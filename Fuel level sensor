@@ -1,0 +1,72 @@
+const int fuelPin = 25; //adjust any pin assignments if necessary.
+#include<WiFi.h>
+#include <WiFiClient.h>
+#define ACCEPT_TYPE "text/csv"
+WiFiClient client;
+String data;
+const char ssid[] = "Raspberry"; //mobile hotspot name
+const char password[] = "123456789"; //mobile hotspot password
+const char host[] = "182.71.78.155"; //dcs.glaitm.org - Domain Name
+const int httpPort = 7081;
+const char appKey[]= "906b82b1-7fd9-421e-be91-a76e9016707f";
+const char Thing[] = "Fuel_level_sensor_thing";
+const char Property1[] = "Fule_level";
+void setup() {
+ Serial.begin(9600);
+ pinMode(fuelPin, INPUT);
+ Serial.println();
+ Serial.print("connecting to ");
+ Serial.println(ssid);
+ WiFi.begin(ssid, password);
+ while (WiFi.status() != WL_CONNECTED)
+{
+ delay(500);
+ Serial.print(".");
+}
+ Serial.println("");
+ Serial.println("WiFi connected");
+ Serial.println("IP address: ");
+ Serial.println(WiFi.localIP());
+}
+void loop() {
+ int sensorValue = analogRead(fuelPin);
+ int fuelLevel = map(sensorValue, 4095, 1230, 0, 100);
+ Serial.print("Fuel Level= ");
+ Serial.print(fuelLevel);
+ Serial.println(" %");
+ delay(1000);
+ Put(Thing,Property1,fuelLevel);
+ }
+void Put(String ThingName, String ThingProperty, float Value)
+ {
+ Serial.println(host);
+ if (!client.connect(host, httpPort))
+{
+ Serial.println("connection failed");
+ return;
+ } else
+{
+ Serial.println("Connected to ThingWorx.");
+ }
+ String url = "/Thingworx/Things/" + ThingName + "/Properties/" + ThingProperty;
+ Serial.print("requesting URL: ");
+ Serial.println(url);
+ String strPUTReqVal = "{\"" + ThingProperty + "\":\"" + Value + "\"}"; 
+ Serial.print("PUT Value: ");
+ Serial.println(strPUTReqVal);
+ client.print(String("PUT ") + url + " HTTP/1.1\r\n" +
+ "Host: " + host + "\r\n" +
+ "appKey:"+ appKey + "\r\n" +
+ "x-thingworx-session: false" + "\r\n" +
+ "Accept: application/json" + "\r\n" +
+ "Connection: close" + "\r\n" +
+ "Content-Type: application/json" + "\r\n" +  
+ "Content-Length: " + String(strPUTReqVal.length()) + "\r\n\r\n" +
+ strPUTReqVal + "\r\n\r\n"); 
+ while (client.connected())
+{
+ String line = client.readStringUntil('\r');
+ Serial.print(line);
+ }
+ client.stop();
+ }
