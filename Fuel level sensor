@@ -4,11 +4,11 @@ const int fuelPin = 25; //adjust any pin assignments if necessary.
 #define ACCEPT_TYPE "text/csv"
 WiFiClient client;
 String data;
-const char ssid[] = "Raspberry"; //mobile hotspot name
-const char password[] = "123456789"; //mobile hotspot password
+const char ssid[] = "xxxxxxx"; //mobile hotspot name
+const char password[] = "xxxxxx"; //mobile hotspot password
 const char host[] = "182.71.78.155"; //dcs.glaitm.org - Domain Name
 const int httpPort = 7081;
-const char appKey[]= "906b82b1-7fd9-421e-be91-a76e9016707f";
+const char appKey[]= "xxxxxxxxx";
 const char Thing[] = "Fuel_level_sensor_thing";
 const char Property1[] = "Fule_level";
 void setup() {
